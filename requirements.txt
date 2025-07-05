@@ -1,0 +1,18 @@
+# 基本的なDjangoパッケージ
+Django==5.2.4
+Pillow==11.0.0
+
+# 翻訳モデル関連
+transformers==4.36.2
+optimum==1.26.1
+optimum-intel==1.22.0
+onnxruntime==1.22.0
+onnx==1.18.0
+openvino==2024.1.0
+tokenizers==0.15.2
+safetensors==0.5.3
+
+# その他の依存パッケージ
+numpy==1.24.4
+tqdm==4.67.1
+requests==2.32.4

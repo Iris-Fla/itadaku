@@ -1,0 +1,150 @@
+{% extends 'app/base.html' %}
+
+{% block title %}{{ menu_item.name }} | レストランメニュー{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 翻訳機能のJavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        // 言語選択が変更されたときの処理
+        document.getElementById('language-selector').addEventListener('change', function() {
+            const selectedLanguage = this.value;
+            // URLパラメータを更新して再読み込み
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', selectedLanguage);
+            window.location.href = url.toString();
+        });
+        
+        // 翻訳ボタンのクリックイベント
+        document.querySelectorAll('.translate-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const fieldName = this.getAttribute('data-field');
+                const targetLanguage = document.getElementById('language-selector').value;
+                const contentId = {{ menu_item.id }};
+                const translationContainer = document.getElementById(`translation-${fieldName}`);
+                const loadingSpinner = this.querySelector('.spinner-border');
+                
+                // ローディング表示
+                loadingSpinner.classList.remove('d-none');
+                
+                // 翻訳APIを呼び出す
+                fetch(`/menu/${contentId}/translate/?field=${fieldName}&lang=${targetLanguage}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // 翻訳結果を表示
+                        translationContainer.textContent = data.translated;
+                        translationContainer.classList.remove('d-none');
+                        // ローディング非表示
+                        loadingSpinner.classList.add('d-none');
+                    })
+                    .catch(error => {
+                        console.error('翻訳エラー:', error);
+                        translationContainer.textContent = 'エラーが発生しました。もう一度お試しください。';
+                        translationContainer.classList.remove('d-none');
+                        // ローディング非表示
+                        loadingSpinner.classList.add('d-none');
+                    });
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'app:menu_list' %}">メニュー一覧</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ menu_item.name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="card mb-4">
+            {% if menu_item.image %}
+            <img src="{{ menu_item.image.url }}" class="card-img-top" alt="{{ menu_item.name }}の画像">
+            {% endif %}
+            <div class="card-body">
+                <!-- 言語選択 -->
+                <div class="mb-3">
+                    <label for="language-selector" class="form-label">翻訳言語:</label>
+                    <select id="language-selector" class="form-select">
+                        {% for lang_code, lang_name in available_languages %}
+                        <option value="{{ lang_code }}" {% if selected_language == lang_code %}selected{% endif %}>{{ lang_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <h1 class="card-title">
+                    {{ menu_item.name }}
+                    <button class="btn btn-sm btn-outline-info translate-btn ms-2" data-field="name">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        翻訳
+                    </button>
+                </h1>
+                <div id="translation-name" class="alert alert-info mt-2 d-none"></div>
+                <h3 class="card-subtitle mb-3 text-muted">¥{{ menu_item.price }}</h3>
+                
+                <!-- カテゴリ表示 -->
+                <div class="mb-3">
+                    {% for category in menu_item.categories.all %}
+                    <span class="badge bg-primary me-1">{{ category.category.name }}</span>
+                    {% endfor %}
+                </div>
+                
+                <!-- 商品詳細 -->
+                <div class="card-text mb-4">
+                    <h4>
+                        商品詳細
+                        <button class="btn btn-sm btn-outline-info translate-btn ms-2" data-field="description">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            翻訳
+                        </button>
+                    </h4>
+                    <p>{{ menu_item.description }}</p>
+                    <div id="translation-description" class="alert alert-info mt-2 d-none"></div>
+                </div>
+                
+                <!-- アレルギー情報 -->
+                <div class="mb-4">
+                    <h4>アレルギー情報</h4>
+                    {% if menu_item.allergens %}
+                    <div>
+                        {% for allergen in menu_item.get_allergens_display %}
+                        <span class="badge bg-warning text-dark allergen-badge">{{ allergen }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p>特定のアレルギー物質は含まれていません。</p>
+                    {% endif %}
+                </div>
+                
+                <!-- その他の情報 -->
+                <div class="mb-4">
+                    <h4>その他の情報</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>ビーガン対応:</strong> 
+                            {% if menu_item.is_vegan %}
+                            <span class="text-success">はい</span>
+                            {% else %}
+                            <span class="text-danger">いいえ</span>
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>豚肉使用:</strong> 
+                            {% if menu_item.contains_pork %}
+                            <span class="text-danger">あり</span>
+                            {% else %}
+                            <span class="text-success">なし</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+                
+                <a href="{% url 'app:menu_list' %}" class="btn btn-primary">メニュー一覧に戻る</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

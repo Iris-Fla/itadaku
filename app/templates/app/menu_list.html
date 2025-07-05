@@ -1,0 +1,144 @@
+{% extends 'app/base.html' %}
+
+{% block title %}メニュー一覧 | レストランメニュー{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">メニュー一覧</h1>
+
+<div class="row">
+    <!-- フィルターセクション -->
+    <div class="col-md-3 mb-4">
+        <div class="filter-section">
+            <h4>フィルター</h4>
+            <form method="get" action="{% url 'app:menu_list' %}">
+                <!-- カテゴリフィルター -->
+                <div class="mb-3">
+                    <label class="form-label">カテゴリ</label>
+                    <select name="category" class="form-select">
+                        <option value="">すべて</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:'i' %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- アレルギーフィルター -->
+                <div class="mb-3">
+                    <label class="form-label">アレルギー除外</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="allergen" value="egg" id="allergen-egg" 
+                            {% if 'egg' in request.GET.allergen %}checked{% endif %}>
+                        <label class="form-check-label" for="allergen-egg">卵</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="allergen" value="milk" id="allergen-milk" 
+                            {% if 'milk' in request.GET.allergen %}checked{% endif %}>
+                        <label class="form-check-label" for="allergen-milk">乳</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="allergen" value="wheat" id="allergen-wheat" 
+                            {% if 'wheat' in request.GET.allergen %}checked{% endif %}>
+                        <label class="form-check-label" for="allergen-wheat">小麦</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="allergen" value="peanut" id="allergen-peanut" 
+                            {% if 'peanut' in request.GET.allergen %}checked{% endif %}>
+                        <label class="form-check-label" for="allergen-peanut">落花生</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="allergen" value="soy" id="allergen-soy" 
+                            {% if 'soy' in request.GET.allergen %}checked{% endif %}>
+                        <label class="form-check-label" for="allergen-soy">大豆</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="allergen" value="fish" id="allergen-fish" 
+                            {% if 'fish' in request.GET.allergen %}checked{% endif %}>
+                        <label class="form-check-label" for="allergen-fish">魚</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="allergen" value="shellfish" id="allergen-shellfish" 
+                            {% if 'shellfish' in request.GET.allergen %}checked{% endif %}>
+                        <label class="form-check-label" for="allergen-shellfish">甲殻類</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="allergen" value="fruit" id="allergen-fruit" 
+                            {% if 'fruit' in request.GET.allergen %}checked{% endif %}>
+                        <label class="form-check-label" for="allergen-fruit">果物</label>
+                    </div>
+                </div>
+                
+                <!-- ビーガンフィルター -->
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="vegan" value="true" id="vegan-filter" 
+                            {% if request.GET.vegan == 'true' %}checked{% endif %}>
+                        <label class="form-check-label" for="vegan-filter">ビーガン対応のみ</label>
+                    </div>
+                </div>
+                
+                <!-- 豚肉フィルター -->
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="pork" value="false" id="pork-filter" 
+                            {% if request.GET.pork == 'false' %}checked{% endif %}>
+                        <label class="form-check-label" for="pork-filter">豚肉なし</label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100">フィルター適用</button>
+                <a href="{% url 'app:menu_list' %}" class="btn btn-outline-secondary w-100 mt-2">リセット</a>
+            </form>
+        </div>
+    </div>
+    
+    <!-- メニュー一覧 -->
+    <div class="col-md-9">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for menu_item in menu_items %}
+            <div class="col">
+                <div class="card menu-item-card h-100">
+                    {% if menu_item.image %}
+                    <img src="{{ menu_item.image.url }}" class="card-img-top" alt="{{ menu_item.name }}の画像" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ menu_item.name }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">¥{{ menu_item.price }}</h6>
+                        <p class="card-text">{{ menu_item.description|truncatechars:50 }}</p>
+                        
+                        <!-- アレルギー表示 -->
+                        {% if menu_item.allergens %}
+                        <div class="mb-2">
+                            {% for allergen in menu_item.get_allergens_display %}
+                            <span class="badge bg-warning text-dark allergen-badge">{{ allergen }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- ビーガン・豚肉表示 -->
+                        <div class="mb-2">
+                            {% if menu_item.is_vegan %}
+                            <span class="badge bg-success">ビーガン対応</span>
+                            {% endif %}
+                            
+                            {% if menu_item.contains_pork %}
+                            <span class="badge bg-danger">豚肉使用</span>
+                            {% endif %}
+                        </div>
+                        
+                        <a href="{% url 'app:menu_item_detail' menu_item.id %}" class="btn btn-sm btn-outline-primary">詳細を見る</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    条件に一致するメニューがありません。フィルター条件を変更してください。
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
