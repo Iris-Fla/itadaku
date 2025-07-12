@@ -13,6 +13,10 @@ class MenuListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = MenuCategory.objects.all().order_by('display_order')
+        # 利用可能な言語のリストを追加
+        context['available_languages'] = get_available_languages()
+        # 選択された言語（デフォルトは日本語）
+        context['selected_language'] = self.request.GET.get('lang', 'ja_XX')
         return context
     
     def get_queryset(self):
@@ -58,16 +62,25 @@ class MenuItemDetailView(DetailView):
 @require_http_methods(["GET"])
 def translate_menu_item(request, pk):
     """メニュー項目の翻訳APIエンドポイント"""
+    # デバッグ情報を出力
+    print(f"翻訳APIが呼び出されました: pk={pk}, GET={request.GET}")
+    
     # パラメータの取得
     field_name = request.GET.get('field', '')
     target_language = request.GET.get('lang', 'en_XX')
     
     # パラメータのバリデーション
     if not field_name or not target_language:
+        print(f"バリデーションエラー: field_name={field_name}, target_language={target_language}")
         return JsonResponse({'error': '必須パラメータが不足しています'}, status=400)
     
     # メニュー項目の取得
-    menu_item = get_object_or_404(MenuItem, pk=pk)
+    try:
+        menu_item = get_object_or_404(MenuItem, pk=pk)
+        print(f"メニュー項目を取得しました: id={menu_item.id}, name={menu_item.name}")
+    except Exception as e:
+        print(f"メニュー項目の取得に失敗しました: pk={pk}, error={e}")
+        return JsonResponse({'error': 'メニュー項目が見つかりません'}, status=404)
     
     # 翻訳対象のフィールドの値を取得
     if field_name == 'name':
@@ -75,16 +88,26 @@ def translate_menu_item(request, pk):
     elif field_name == 'description':
         text = menu_item.description
     else:
+        print(f"無効なフィールド名: {field_name}")
         return JsonResponse({'error': '無効なフィールド名です'}, status=400)
     
+    print(f"翻訳を実行します: text={text}, target_language={target_language}")
+    
     # 翻訳の実行（キャッシュを利用）
-    translated_text = translate_text_with_cache(
-        text, 'menu_item', menu_item.id, field_name, target_language
-    )
+    try:
+        translated_text = translate_text_with_cache(
+            text, 'menu_item', menu_item.id, field_name, target_language
+        )
+        print(f"翻訳結果: {translated_text}")
+    except Exception as e:
+        print(f"翻訳エラー: {e}")
+        return JsonResponse({'error': f'翻訳処理中にエラーが発生しました: {str(e)}'}, status=500)
     
     # 結果を返す
-    return JsonResponse({
+    response_data = {
         'original': text,
         'translated': translated_text,
         'language': target_language
-    })
+    }
+    print(f"レスポンス: {response_data}")
+    return JsonResponse(response_data)

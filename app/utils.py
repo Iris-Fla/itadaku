@@ -77,22 +77,33 @@ def translate_text_with_cache(text: str, content_type: str, object_id: int,
     Returns:
         翻訳されたテキスト
     """
+    print(f"translate_text_with_cache が呼び出されました: text={text}, content_type={content_type}, object_id={object_id}, field_name={field_name}, target_language={target_language}")
+    
     # 空のテキストは翻訳しない
     if not text:
+        print("空のテキストが渡されました。空文字列を返します。")
         return ""
         
     # キャッシュを確認
+    print("キャッシュを確認します...")
     cached_translation = get_translation_cache(
         content_type, object_id, field_name, target_language
     )
     
     # キャッシュがあればそれを返す
     if cached_translation is not None:
+        print(f"キャッシュが見つかりました: {cached_translation}")
         return cached_translation
+    
+    print("キャッシュが見つかりませんでした。翻訳を実行します...")
     
     # キャッシュがなければ翻訳して保存
     try:
+        print(f"translate_text_base を呼び出します: text={text}, target_language={target_language}")
         translated_text = translate_text_base(text, target_language)
+        print(f"翻訳結果: {translated_text}")
+        
+        print("翻訳結果をキャッシュに保存します...")
         save_translation_cache(
             content_type, object_id, field_name, text, target_language, translated_text
         )
@@ -100,6 +111,8 @@ def translate_text_with_cache(text: str, content_type: str, object_id: int,
     except Exception as e:
         # 翻訳に失敗した場合はエラーをログに記録し、元のテキストを返す
         print(f"翻訳エラー: {e}")
+        import traceback
+        print(f"スタックトレース: {traceback.format_exc()}")
         return text
 
 
