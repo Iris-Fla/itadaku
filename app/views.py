@@ -13,9 +13,21 @@ class MenuListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = MenuCategory.objects.all().order_by('display_order')
-        # 利用可能な言語のリストを追加
-        context['available_languages'] = get_available_languages()
-        # 選択された言語（デフォルトは日本語）
+        
+        # 利用可能な言語のリストに国コードを追加
+        available_languages = get_available_languages()
+        languages_with_flags = []
+        for code, name in available_languages:
+            country_code = code.split('_')[-1].lower()
+            if country_code == 'xx': # 'en_XX'のような場合
+                country_code = 'us' if code == 'en_XX' else 'un' # enはus、その他は国連旗
+            elif country_code == 'cn':
+                country_code = 'cn'
+            elif code == 'ja_XX':
+                country_code = 'jp'
+            languages_with_flags.append((code, name, country_code))
+        
+        context['available_languages'] = languages_with_flags
         context['selected_language'] = self.request.GET.get('lang', 'ja_XX')
         return context
     

@@ -98,11 +98,6 @@
                     if (icon) {
                         icon.classList.remove('d-none');
                     }
-                    
-                    // アレルギーとビーガン対応の翻訳
-                    if (targetLanguage !== 'ja_XX') {
-                        translateLabels(targetLanguage);
-                    }
                 })
                 .catch(error => {
                     console.error('翻訳エラー:', error);
@@ -133,142 +128,6 @@
                 });
             });
         });
-        
-        // アレルギーとビーガン対応のラベルを翻訳する関数
-        function translateLabels(targetLanguage) {
-            // アレルギー表示の翻訳マッピング
-            const allergenTranslations = {
-                'en_XX': {
-                    '卵': 'Egg',
-                    '乳': 'Milk',
-                    '小麦': 'Wheat',
-                    'えび': 'Shrimp',
-                    'かに': 'Crab',
-                    '落花生': 'Peanut',
-                    'そば': 'Buckwheat',
-                    '魚': 'Fish',
-                    'ナッツ類': 'Nuts',
-                    '大豆': 'Soy',
-                    '果物': 'Fruit',
-                    'ごま': 'Sesame',
-                    'ビーガン対応': 'Vegan',
-                    '豚肉使用': 'Contains Pork'
-                },
-                'zh_XX': {
-                    '卵': '鸡蛋',
-                    '乳': '牛奶',
-                    '小麦': '小麦',
-                    'えび': '虾',
-                    'かに': '蟹',
-                    '落花生': '花生',
-                    'そば': '荞麦',
-                    '魚': '鱼',
-                    'ナッツ類': '坚果',
-                    '大豆': '大豆',
-                    '果物': '水果',
-                    'ごま': '芝麻',
-                    'ビーガン対応': '纯素食',
-                    '豚肉使用': '含猪肉'
-                },
-                'ko_XX': {
-                    '卵': '계란',
-                    '乳': '우유',
-                    '小麦': '밀',
-                    'えび': '새우',
-                    'かに': '게',
-                    '落花生': '땅콩',
-                    'そば': '메밀',
-                    '魚': '생선',
-                    'ナッツ類': '견과류',
-                    '大豆': '대두',
-                    '果物': '과일',
-                    'ごま': '참깨',
-                    'ビーガン対応': '비건',
-                    '豚肉使用': '돼지고기 포함'
-                }
-            };
-            
-            // 選択された言語の翻訳マッピングを取得
-            const translations = allergenTranslations[targetLanguage] || allergenTranslations['en_XX'];
-            
-            // アレルギーバッジの翻訳
-            document.querySelectorAll('.allergen-badge').forEach(badge => {
-                const originalText = badge.getAttribute('title');
-                if (translations[originalText]) {
-                    // テキスト部分のみを置換（アイコンは保持）
-                    const icon = badge.querySelector('i');
-                    badge.textContent = ' ' + translations[originalText];
-                    if (icon) {
-                        badge.prepend(icon.cloneNode(true));
-                    }
-                }
-            });
-            
-            // ビーガン対応バッジの翻訳
-            document.querySelectorAll('.badge.bg-success').forEach(badge => {
-                const originalText = badge.getAttribute('title');
-                if (translations[originalText]) {
-                    // テキスト部分のみを置換（アイコンは保持）
-                    const icon = badge.querySelector('i');
-                    badge.textContent = ' ' + translations[originalText];
-                    if (icon) {
-                        badge.prepend(icon.cloneNode(true));
-                    }
-                }
-            });
-            
-            // 豚肉使用バッジの翻訳
-            document.querySelectorAll('.badge.bg-danger').forEach(badge => {
-                const originalText = badge.getAttribute('title');
-                if (translations[originalText]) {
-                    // テキスト部分のみを置換（アイコンは保持）
-                    const icon = badge.querySelector('i');
-                    badge.textContent = ' ' + translations[originalText];
-                    if (icon) {
-                        badge.prepend(icon.cloneNode(true));
-                    }
-                }
-            });
-        }
-        
-        // ラベルを日本語に戻す関数
-        function resetLabelsToJapanese() {
-            // アレルギーバッジを日本語に戻す
-            document.querySelectorAll('.allergen-badge').forEach(badge => {
-                const originalText = badge.getAttribute('title');
-                const icon = badge.querySelector('i');
-                badge.textContent = ' ' + originalText;
-                if (icon) {
-                    badge.prepend(icon.cloneNode(true));
-                }
-            });
-            
-            // ビーガン対応バッジを日本語に戻す
-            document.querySelectorAll('.badge.bg-success').forEach(badge => {
-                const originalText = badge.getAttribute('title');
-                const icon = badge.querySelector('i');
-                badge.textContent = ' ' + originalText;
-                if (icon) {
-                    badge.prepend(icon.cloneNode(true));
-                }
-            });
-            
-            // 豚肉使用バッジを日本語に戻す
-            document.querySelectorAll('.badge.bg-danger').forEach(badge => {
-                const originalText = badge.getAttribute('title');
-                const icon = badge.querySelector('i');
-                badge.textContent = ' ' + originalText;
-                if (icon) {
-                    badge.prepend(icon.cloneNode(true));
-                }
-            });
-        }
-        
-        // 初期表示時に選択された言語が日本語以外の場合、ラベルを翻訳
-        const initialLanguage = document.getElementById('language-selector').value;
-        if (initialLanguage !== 'ja_XX') {
-            translateLabels(initialLanguage);
-        }
     });
 </script>
 {% endblock %}
@@ -276,25 +135,26 @@
 {% block extra_css %}
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <style>
-    /* 横並びカードスタイル */
+    /* 横並びカードスタイルを縦型に変更 */
     .horizontal-card {
         display: flex;
-        flex-direction: row;
+        flex-direction: column; /* 横から縦に変更 */
         overflow: hidden;
         margin-bottom: 1rem;
         border-radius: 8px;
         cursor: pointer;
         position: relative;
         transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%; /* カードの高さを統一 */
     }
     .horizontal-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     .horizontal-card .card-img-container {
-        width: 120px;
-        min-width: 120px;
-        height: 120px;
+        width: 100%; /* 幅を100%に変更 */
+        min-width: unset; /* min-widthを削除 */
+        height: 200px; /* 高さを調整 */
         overflow: hidden;
         display: flex;
         align-items: center;
@@ -359,17 +219,26 @@
         box-sizing: border-box;
     }
     .menu-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    width: 100%;
-}
-
-@media (max-width: 768px) {
-    .menu-container {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 常に2列に固定 */
+        gap: 20px;
+        width: 100%;
     }
-}
+
+    @media (max-width: 768px) {
+        .menu-container {
+            grid-template-columns: 1fr; /* モバイルでは1列 */
+        }
+        .horizontal-card .card-img-container {
+            height: 150px; /* モバイルでは画像高さを調整 */
+        }
+    }
+
+    @media (max-width: 480px) {
+        .horizontal-card .card-img-container {
+            height: 120px; /* 小さい画面ではさらに調整 */
+        }
+    }
 </style>
 {% endblock %}
 
@@ -378,10 +247,13 @@
     <h1>MENU</h1>
     <!-- 言語選択 -->
     <div class="language-selector">
-        <label for="language-selector" class="form-label me-2">翻訳言語:</label>
+        <label for="language-selector" class="form-label"><i data-lucide="earth" size="14"></i><strong>LANGUAGE:</strong></label>
         <select id="language-selector" class="form-select form-select-sm" style="width: auto; display: inline-block;">
-            {% for lang_code, lang_name in available_languages %}
-            <option value="{{ lang_code }}" {% if selected_language == lang_code %}selected{% endif %}>{{ lang_name }}</option>
+            {% for lang_code, lang_name, country_code in available_languages %}
+            <option value="{{ lang_code }}" {% if selected_language == lang_code %}selected{% endif %}>
+                <span class="fi fi-{{ country_code }} fis me-2"></span>
+                {{ lang_name }}
+            </option>
             {% endfor %}
         </select>
     </div>
@@ -405,7 +277,7 @@
 
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
-                        <div>
+                        <div class="mt-2">
                             <h5 class="card-title" id="name-{{ menu_item.id }}">{{ menu_item.name }}</h5>
                             <div id="translation-name-{{ menu_item.id }}" class="text-info d-none"></div>
                         </div>
@@ -414,57 +286,56 @@
                                 <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                 <i data-lucide="languages" size="14"></i>
                             </button>
-                            <h6 class="card-subtitle text-muted mb-0">¥{{ menu_item.price }}</h6>
+                            <h6 class="card-subtitle fs-3 text-muted">¥{{ menu_item.price }}</h6>
                         </div>
                     </div>
                     <div class="position-relative">
                         <p class="card-text" id="description-{{ menu_item.id }}">{{ menu_item.description|truncatechars:50 }}</p>
                         <div id="translation-description-{{ menu_item.id }}" class="text-info d-none"></div>
                     </div>
-                        
-                    <div class="badge-container">
-                        <!-- アレルギー表示 -->
-                        {% if menu_item.allergens %}
-                        {% for allergen in menu_item.allergens %}
-                            {% if allergen == 'egg' %}
-                            <span class="badge bg-warning text-dark allergen-badge" title="卵"><i data-lucide="egg" size="14"></i> 卵</span>
-                            {% elif allergen == 'milk' %}
-                            <span class="badge bg-warning text-dark allergen-badge" title="乳"><i data-lucide="milk" size="14"></i> 乳</span>
-                            {% elif allergen == 'wheat' %}
-                            <span class="badge bg-warning text-dark allergen-badge" title="小麦"><i data-lucide="wheat" size="14"></i> 小麦</span>
-                            {% elif allergen == 'shrimp' %}
-                            <span class="badge bg-warning text-dark allergen-badge" title="えび"><i data-lucide="fish" size="14"></i> えび</span>
-                            {% elif allergen == 'crab' %}
-                            <span class="badge bg-warning text-dark allergen-badge" title="かに"><i data-lucide="crab" size="14"></i> かに</span>
-                            {% elif allergen == 'peanut' %}
-                            <span class="badge bg-warning text-dark allergen-badge" title="落花生"><i data-lucide="nut" size="14"></i> 落花生</span>
-                            {% elif allergen == 'soba' %}
-                            <span class="badge bg-warning text-dark allergen-badge" title="そば"><i data-lucide="utensils" size="14"></i> そば</span>
-                            {% elif allergen == 'fish' %}
-                            <span class="badge bg-warning text-dark allergen-badge" title="魚"><i data-lucide="fish" size="14"></i> 魚</span>
-                            {% elif allergen == 'nuts' %}
-                            <span class="badge bg-warning text-dark allergen-badge" title="ナッツ類"><i data-lucide="nut" size="14"></i> ナッツ類</span>
-                            {% elif allergen == 'soy' %}
-                            <span class="badge bg-warning text-dark allergen-badge" title="大豆"><i data-lucide="bean" size="14"></i> 大豆</span>
-                            {% elif allergen == 'fruit' %}
-                            <span class="badge bg-warning text-dark allergen-badge" title="果物"><i data-lucide="apple" size="14"></i> 果物</span>
-                            {% elif allergen == 'sesame' %}
-                            <span class="badge bg-warning text-dark allergen-badge" title="ごま"><i data-lucide="seed" size="14"></i> ごま</span>
-                            {% else %}
-                            <span class="badge bg-warning text-dark allergen-badge">{{ allergen }}</span>
-                            {% endif %}
-                        {% endfor %}
-                        {% endif %}
-                        
-                        <!-- ビーガン・豚肉表示 -->
-                        {% if menu_item.is_vegan %}
-                        <span class="badge bg-success" title="ビーガン対応"><i data-lucide="leaf" size="14"></i> ビーガン対応</span>
-                        {% endif %}
+                    <div class="badge-container mt-2"> 
+    <!-- Allergen Display --> 
+    {% if menu_item.allergens %} 
+    {% for allergen in menu_item.allergens %} 
+        {% if allergen == 'egg' %} 
+        <span class="badge bg-warning text-dark allergen-badge" title="Egg"><i data-lucide="egg" size="14"></i> Egg</span> 
+        {% elif allergen == 'milk' %} 
+        <span class="badge bg-warning text-dark allergen-badge" title="Milk"><i data-lucide="milk" size="14"></i> Milk</span> 
+        {% elif allergen == 'wheat' %} 
+        <span class="badge bg-warning text-dark allergen-badge" title="Wheat"><i data-lucide="wheat" size="14"></i> Wheat</span> 
+        {% elif allergen == 'shrimp' %} 
+        <span class="badge bg-warning text-dark allergen-badge" title="Shrimp"><i data-lucide="shrimp" size="14"></i> Shrimp</span> 
+        {% elif allergen == 'crab' %} 
+        <span class="badge bg-warning text-dark allergen-badge" title="Crab"><i data-lucide="crab" size="14"></i> Crab</span> 
+        {% elif allergen == 'peanut' %} 
+        <span class="badge bg-warning text-dark allergen-badge" title="Peanut"><i data-lucide="nut" size="14"></i> Peanut</span> 
+        {% elif allergen == 'soba' %} 
+        <span class="badge bg-warning text-dark allergen-badge" title="Buckwheat"><i data-lucide="utensils" size="14"></i> Buckwheat</span> 
+        {% elif allergen == 'fish' %} 
+        <span class="badge bg-warning text-dark allergen-badge" title="Fish"><i data-lucide="fish" size="14"></i> Fish</span> 
+        {% elif allergen == 'nuts' %} 
+        <span class="badge bg-warning text-dark allergen-badge" title="Tree Nuts"><i data-lucide="nut" size="14"></i> Tree Nuts</span> 
+        {% elif allergen == 'soy' %} 
+        <span class="badge bg-warning text-dark allergen-badge" title="Soy"><i data-lucide="bean" size="14"></i> Soy</span> 
+        {% elif allergen == 'fruit' %} 
+        <span class="badge bg-warning text-dark allergen-badge" title="Fruit"><i data-lucide="apple" size="14"></i> Fruit</span> 
+        {% elif allergen == 'sesame' %} 
+        <span class="badge bg-warning text-dark allergen-badge" title="Sesame"><i data-lucide="seed" size="14"></i> Sesame</span> 
+        {% else %} 
+        <span class="badge bg-warning text-dark allergen-badge"> {{ allergen }} </span> 
+        {% endif %} 
+    {% endfor %} 
+    {% endif %} 
+    
+    <!-- Vegan and Pork Display --> 
+    {% if menu_item.is_vegan %} 
+    <span class="badge bg-success" title="Vegan Friendly"><i data-lucide="leaf" size="14"></i> Vegan Friendly</span> 
+    {% endif %} 
 
-                        {% if menu_item.contains_pork %}
-                        <span class="badge bg-danger" title="豚肉使用"><i data-lucide="beef" size="14"></i> 豚肉使用</span>
-                        {% endif %}
-                    </div>
+    {% if menu_item.contains_pork %} 
+    <span class="badge bg-danger" title="Contains Pork"><i data-lucide="beef" size="14"></i> Contains Pork</span> 
+    {% endif %} 
+</div>
                 </div>
             </div>
             {% endfor %}
@@ -478,3 +349,260 @@
     </div>
 </div>
 {% endblock %}
+    // 言語選択が変更されたときの処理
+    // DOMが完全に読み込まれた後に実行
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOMContentLoaded イベントが発火しました');
+        // 言語選択が変更されたときの処理
+        document.getElementById('language-selector').addEventListener('change', function() {
+            const selectedLanguage = this.value;
+            
+            // アレルギーとビーガン対応のラベルを翻訳
+            if (selectedLanguage !== 'ja_XX') {
+                translateLabels(selectedLanguage);
+            } else {
+                // 日本語の場合は元の表示に戻す
+                resetLabelsToJapanese();
+            }
+            
+            // URLパラメータを更新して再読み込み
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', selectedLanguage);
+            window.location.href = url.toString();
+        });
+        
+        // 翻訳ボタンのクリックイベント
+        console.log('翻訳ボタンのイベントリスナーを設定します');
+        const translateButtons = document.querySelectorAll('.translate-btn');
+        console.log(`${translateButtons.length}個の翻訳ボタンが見つかりました`);
+        
+        translateButtons.forEach(function(btn, index) {
+            console.log(`ボタン${index + 1}にイベントリスナーを追加します:`, btn);
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // 親要素へのイベント伝播を停止
+                console.log(`ボタン${index + 1}がクリックされました`);
+                
+                const menuItemId = this.getAttribute('data-id');
+                const targetLanguage = document.getElementById('language-selector').value;
+                
+                // ローディング表示
+                const spinner = this.querySelector('.spinner-border');
+                if (spinner) {
+                    spinner.classList.remove('d-none');
+                }
+                const icon = this.querySelector('i');
+                if (icon) {
+                    icon.classList.add('d-none');
+                }
+                
+                console.log(`翻訳API呼び出し: メニューID=${menuItemId}, 言語=${targetLanguage}`);
+                
+                // 商品名と詳細の両方を翻訳
+                Promise.all([
+                    fetch(`/menu/${menuItemId}/translate/?field=name&lang=${targetLanguage}`)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw new Error(`名前の翻訳APIエラー: ${res.status}`);
+                            }
+                            return res.json();
+                        }),
+                    fetch(`/menu/${menuItemId}/translate/?field=description&lang=${targetLanguage}`)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw new Error(`説明の翻訳APIエラー: ${res.status}`);
+                            }
+                            return res.json();
+                        })
+                ])
+                .then(([nameData, descData]) => {
+                    console.log('翻訳結果を受信:', nameData, descData);
+                    
+                    // 商品名の翻訳結果を表示
+                    const nameTranslationElement = document.getElementById(`translation-name-${menuItemId}`);
+                    if (nameTranslationElement) {
+                        nameTranslationElement.textContent = nameData.translated;
+                        nameTranslationElement.classList.remove('d-none');
+                    } else {
+                        console.error(`要素が見つかりません: translation-name-${menuItemId}`);
+                    }
+                    
+                    // 詳細の翻訳結果を表示
+                    const descTranslationElement = document.getElementById(`translation-description-${menuItemId}`);
+                    if (descTranslationElement) {
+                        descTranslationElement.textContent = descData.translated;
+                        descTranslationElement.classList.remove('d-none');
+                    } else {
+                        console.error(`要素が見つかりません: translation-description-${menuItemId}`);
+                    }
+                    
+                    // ローディング非表示
+                    if (spinner) {
+                        spinner.classList.add('d-none');
+                    }
+                    if (icon) {
+                        icon.classList.remove('d-none');
+                    }
+                    
+                    // アレルギーとビーガン対応の翻訳
+                    if (targetLanguage !== 'ja_XX') {
+                        translateLabels(targetLanguage);
+                    }
+                })
+                .catch(error => {
+                    console.error('翻訳エラー:', error);
+                    
+                    // エラーメッセージを表示
+                    const nameTranslationElement = document.getElementById(`translation-name-${menuItemId}`);
+                    if (nameTranslationElement) {
+                        nameTranslationElement.textContent = 'エラーが発生しました';
+                        nameTranslationElement.classList.remove('d-none');
+                    }
+                    
+                    const descTranslationElement = document.getElementById(`translation-description-${menuItemId}`);
+                    if (descTranslationElement) {
+                        descTranslationElement.textContent = 'エラーが発生しました';
+                        descTranslationElement.classList.remove('d-none');
+                    }
+                    
+                    // ローディング非表示
+                    if (spinner) {
+                        spinner.classList.add('d-none');
+                    }
+                    if (icon) {
+                        icon.classList.remove('d-none');
+                    }
+                    
+                    // アラートでエラーを表示
+                    alert('翻訳中にエラーが発生しました。もう一度お試しください。');
+                });
+            });
+        });
+        
+        // アレルギーとビーガン対応のラベルを翻訳する関数
+        // アレルギーとビーガン対応のラベルを翻訳する関数
+        function translateLabels(targetLanguage) {
+            // アレルギー表示の翻訳マッピング
+            const allergenTranslations = {
+                'en_XX': {
+                    '卵': 'Egg',
+                    '乳': 'Milk',
+                    '小麦': 'Wheat',
+                    'えび': 'Shrimp',
+                    'かに': 'Crab',
+                    '落花生': 'Peanut',
+                    'そば': 'Buckwheat',
+                    '魚': 'Fish',
+                    'ナッツ類': 'Nuts',
+                    '大豆': 'Soy',
+                    '果物': 'Fruit',
+                    'ごま': 'Sesame',
+                    'ビーガン対応': 'Vegan',
+                    '豚肉使用': 'Contains Pork'
+                },
+                'zh_XX': {
+                    '卵': '鸡蛋',
+                    '乳': '牛奶',
+                    '小麦': '小麦',
+                    'えび': '虾',
+                    'かに': '蟹',
+                    '落花生': '花生',
+                    'そば': '荞麦',
+                    '魚': '鱼',
+                    'ナッツ類': '坚果',
+                    '大豆': '大豆',
+                    '果物': '水果',
+                    'ごま': '芝麻',
+                    'ビーガン対応': '纯素食',
+                    '豚肉使用': '含猪肉'
+                },
+                'ko_XX': {
+                    '卵': '계란',
+                    '乳': '우유',
+                    '小麦': '밀',
+                    'えび': '새우',
+                    'かに': '게',
+                    '落花生': '땅콩',
+                    'そば': '메밀',
+                    '魚': '생선',
+                    'ナッツ類': '견과류',
+                    '大豆': '대두',
+                    '果物': '과일',
+                    'ごま': '참깨',
+                    'ビーガン対応': '비건',
+                    '豚肉使用': '돼지고기 포함'
+                }
+            };
+            
+            // 選択された言語の翻訳マッピングを取得
+            const translations = allergenTranslations[targetLanguage] || allergenTranslations['en_XX'];
+            
+            // アレルギーバッジの翻訳
+            document.querySelectorAll('.allergen-badge').forEach(badge => {
+                const originalText = badge.getAttribute('title');
+                if (translations[originalText]) {
+                    // 既存のアイコン要素を取得
+                    const iconElement = badge.querySelector('i[data-lucide]');
+                    if (iconElement) {
+                        // アイコンの属性を保存
+                        const lucideIcon = iconElement.getAttribute('data-lucide');
+                        const iconSize = iconElement.getAttribute('size') || '14';
+                        
+                        // 新しいHTMLを作成（アイコンの属性を保持）
+                        badge.innerHTML = `<i data-lucide="${lucideIcon}" size="${iconSize}"></i> ${translations[originalText]}`;
+                    } else {
+                        // アイコンがない場合はテキストのみ
+                        badge.textContent = translations[originalText];
+                    }
+                }
+            });
+        
+            // ビーガン対応バッジの翻訳
+            document.querySelectorAll('.badge.bg-success').forEach(badge => {
+                const originalText = badge.getAttribute('title');
+                if (translations[originalText]) {
+                    const iconElement = badge.querySelector('i[data-lucide]');
+                    if (iconElement) {
+                        const lucideIcon = iconElement.getAttribute('data-lucide');
+                        const iconSize = iconElement.getAttribute('size') || '14';
+                        badge.innerHTML = `<i data-lucide="${lucideIcon}" size="${iconSize}"></i> ${translations[originalText]}`;
+                    } else {
+                        badge.textContent = translations[originalText];
+                    }
+                }
+            });
+        
+            // 豚肉使用バッジの翻訳
+            document.querySelectorAll('.badge.bg-danger').forEach(badge => {
+                const originalText = badge.getAttribute('title');
+                if (translations[originalText]) {
+                    const iconElement = badge.querySelector('i[data-lucide]');
+                    if (iconElement) {
+                        const lucideIcon = iconElement.getAttribute('data-lucide');
+                        const iconSize = iconElement.getAttribute('size') || '14';
+                        badge.innerHTML = `<i data-lucide="${lucideIcon}" size="${iconSize}"></i> ${translations[originalText]}`;
+                    } else {
+                        badge.textContent = translations[originalText];
+                    }
+                }
+            });
+        
+            // 重要：Lucideアイコンを再初期化
+            // DOMの更新が完了してから実行するため、少し遅延を入れる
+            setTimeout(() => {
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                    console.log('Lucideアイコンを再初期化しました');
+                }
+            }, 50);
+        }
+        
+        // ラベルを日本語に戻す関数
+        function resetLabelsToJapanese() {
+            // アレルギーバッジを日本語に戻す
+            document.querySelectorAll('.allergen-badge').forEach(badge => {
+                const originalText = badge.getAttribute('title');
+                const iconElement = badge.querySelector('i[data-lucide]');
+                if (iconElement) {
+                    const lucideIcon = iconElement.getAttribute('data-lucide');
+                    const iconSize = iconElement.getAttribute('size') || '14';

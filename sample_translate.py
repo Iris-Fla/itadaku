@@ -11,7 +11,7 @@ tokenizer.src_lang = "hi_IN"
 encoded_hi = tokenizer(article_hi, return_tensors="pt")
 generated_tokens = model.generate(
     **encoded_hi,
-    forced_bos_token_id=tokenizer.lang_code_to_id["ja_XX"]
+    forced_bos_token_id=tokenizer.lang_code_to_id["en_XX"]
 )
 print(tokenizer.batch_decode(generated_tokens, skip_special_tokens=True))
 # => "Le chef de l 'ONU affirme qu 'il n 'y a pas de solution militaire dans la Syrie."
@@ -21,7 +21,7 @@ tokenizer.src_lang = "ar_AR"
 encoded_ar = tokenizer(article_ar, return_tensors="pt")
 generated_tokens = model.generate(
     **encoded_ar,
-    forced_bos_token_id=tokenizer.lang_code_to_id["ja_XX"]
+    forced_bos_token_id=tokenizer.lang_code_to_id["zh_CN"]
 )
 print(tokenizer.batch_decode(generated_tokens, skip_special_tokens=True))
 # => "The Secretary-General of the United Nations says there is no military solution in Syria."
