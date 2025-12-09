@@ -14,9 +14,9 @@
 
 ## インストール方法
 
-### 前提条件
+### 環境
 
-- Python 3.8以上
+- Python 3.12
 - pip（Pythonパッケージマネージャー）
 
 ### 手順
@@ -24,7 +24,7 @@
 1. リポジトリをクローン
 
 ```bash
-git clone https://github.com/yourusername/itadaku.git
+git clone https://github.com/iris-fla/itadaku.git
 cd itadaku
 ```
 
@@ -32,12 +32,9 @@ cd itadaku
 
 ```bash
 # Windows
-python -m venv venv
+py -3.12 -m venv venv
 venv\Scripts\activate
 
-# macOS/Linux
-python -m venv venv
-source venv/bin/activate
 ```
 
 3. 必要なパッケージをインストール

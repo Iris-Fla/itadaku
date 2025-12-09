@@ -1,0 +1,42 @@
+{% extends 'app/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">メニューPDF出力</h4>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">翻訳されたメニューをPDF形式でダウンロードできます。</p>
+                    
+                    <form method="post" action="{% url 'app:pdf_export' %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="languageSelect" class="form-label">言語を選択してください</label>
+                            <select class="form-select form-select-lg" id="languageSelect" name="lang">
+                                {% for code, name, country_code in available_languages %}
+                                    <option value="{{ code }}" {% if code == 'ja_XX' %}selected{% endif %}>
+                                        {{ name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-file-earmark-pdf"></i> PDFを生成してダウンロード
+                            </button>
+                            <a href="{% url 'app:menu_list' %}" class="btn btn-secondary">
+                                メニュー一覧に戻る
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

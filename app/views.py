@@ -1,7 +1,11 @@
+import io
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 from .models import MenuItem, MenuCategory, TranslationCache
 from .utils import translate_text_with_cache, get_available_languages
 
@@ -123,3 +127,104 @@ def translate_menu_item(request, pk):
     }
     print(f"レスポンス: {response_data}")
     return JsonResponse(response_data)
+
+def render_to_pdf(template_src, context_dict={}):
+    """HTMLテンプレートをPDFに変換するヘルパー関数"""
+    template = get_template(template_src)
+    html = template.render(context_dict)
+    pdf = pisa.pisaDocument(io.BytesIO(html.encode("UTF-8")), dest=io.BytesIO())
+    if pdf.err:
+        return HttpResponse('Error Rendering PDF', status=400)
+    return HttpResponse(pdf.dest.getvalue(), content_type='application/pdf')
+
+def pdf_export_view(request):
+    """PDF出力用のビュー"""
+    if request.method == 'POST':
+        target_language = request.POST.get('lang', 'ja_XX')
+        
+        # 全メニュー項目を取得
+        # カテゴリごとに整理するために、カテゴリも取得
+        categories = MenuCategory.objects.all().order_by('display_order')
+        
+        # カテゴリごとにメニュー項目をまとめる構造を作る
+        menu_data = []
+        for category in categories:
+            items = MenuItem.objects.filter(
+                categories__category=category, 
+                is_available=True
+            ).order_by('name')
+            
+            translated_items = []
+            for item in items:
+                # 名前と説明を翻訳
+                # 日本語の場合は翻訳しない（元のテキストを使用）
+                if target_language == 'ja_XX':
+                    translated_name = item.name
+                    translated_description = item.description
+                else:
+                    translated_name = translate_text_with_cache(
+                        item.name, 'menu_item', item.id, 'name', target_language
+                    )
+                    translated_description = translate_text_with_cache(
+                        item.description, 'menu_item', item.id, 'description', target_language
+                    )
+                
+                # 翻訳されたデータを持つ辞書を作成
+                item_data = {
+                    'original': item,
+                    'name': translated_name,
+                    'description': translated_description,
+                    'price': item.price,
+                    'image': item.image,
+                    'allergens': item.get_allergens_display(),
+                    'is_vegan': item.is_vegan,
+                    'contains_pork': item.contains_pork,
+                }
+                translated_items.append(item_data)
+            
+            if translated_items:
+                menu_data.append({
+                    'category': category,
+                    'items': translated_items
+                })
+            
+        context = {
+            'menu_data': menu_data,
+            'target_language': target_language,
+        }
+        
+        template_path = 'app/menu_pdf.html'
+        template = get_template(template_path)
+        html = template.render(context)
+        
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="menu_{target_language}.pdf"'
+        
+        # 日本語フォント対応のための設定が必要だが、まずはデフォルトで試す
+        pisa_status = pisa.CreatePDF(
+            html, dest=response
+        )
+        
+        if pisa_status.err:
+            return HttpResponse('We had some errors <pre>' + html + '</pre>')
+        return response
+    
+    else:
+        # 言語選択フォームを表示
+        available_languages = get_available_languages()
+        # 国コードを追加（フラグ表示用）
+        languages_with_flags = []
+        for code, name in available_languages:
+            country_code = code.split('_')[-1].lower()
+            if country_code == 'xx':
+                country_code = 'us' if code == 'en_XX' else 'un'
+            elif country_code == 'cn':
+                country_code = 'cn'
+            elif code == 'ja_XX':
+                country_code = 'jp'
+            languages_with_flags.append((code, name, country_code))
+            
+        context = {
+            'available_languages': languages_with_flags,
+        }
+        return render(request, 'app/pdf_export_form.html', context)

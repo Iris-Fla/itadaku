@@ -245,17 +245,23 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>MENU</h1>
-    <!-- 言語選択 -->
-    <div class="language-selector">
-        <label for="language-selector" class="form-label"><i data-lucide="earth" size="14"></i><strong>LANGUAGE:</strong></label>
-        <select id="language-selector" class="form-select form-select-sm" style="width: auto; display: inline-block;">
-            {% for lang_code, lang_name, country_code in available_languages %}
-            <option value="{{ lang_code }}" {% if selected_language == lang_code %}selected{% endif %}>
-                <span class="fi fi-{{ country_code }} fis me-2"></span>
-                {{ lang_name }}
-            </option>
-            {% endfor %}
-        </select>
+    <div class="d-flex align-items-center">
+        <!-- PDF出力ボタン -->
+        <a href="{% url 'app:pdf_export' %}" class="btn btn-outline-primary me-3">
+            <i data-lucide="file-text" size="14"></i> PDF出力
+        </a>
+        <!-- 言語選択 -->
+        <div class="language-selector">
+            <label for="language-selector" class="form-label"><i data-lucide="earth" size="14"></i><strong>LANGUAGE:</strong></label>
+            <select id="language-selector" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                {% for lang_code, lang_name, country_code in available_languages %}
+                <option value="{{ lang_code }}" {% if selected_language == lang_code %}selected{% endif %}>
+                    <span class="fi fi-{{ country_code }} fis me-2"></span>
+                    {{ lang_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
 </div>
 
