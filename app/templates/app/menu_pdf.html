@@ -37,17 +37,24 @@
             padding: 5px;
         }
         
-        .menu-item {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #ddd;
-            page-break-inside: avoid;
+        .menu-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .menu-cell {
+            width: 50%;
+            vertical-align: top;
+            padding: 10px;
+            border: 1px solid #ddd;
         }
         
         .item-name {
-            font-size: 14pt;
+            font-size: 12pt;
             font-weight: bold;
             color: #333;
+            height: 2.5em;
+            overflow: hidden;
         }
         
         .item-price {
@@ -58,31 +65,30 @@
         }
         
         .item-description {
-            font-size: 10pt;
+            font-size: 9pt;
             color: #666;
             margin-top: 5px;
+            height: 3.5em;
+            overflow: hidden;
         }
         
+        .image-container {
+            width: 100%;
+            height: 150px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
         .item-image {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            float: left;
-            margin-right: 10px;
-        }
-        
-        .item-details {
-            margin-left: 110px;
-        }
-        
-        .allergens {
-            font-size: 9pt;
-            color: #888;
-            margin-top: 5px;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
         }
         
         .badges {
             margin-top: 5px;
+            font-size: 8pt;
         }
         
         .badge {
@@ -92,6 +98,7 @@
             border-radius: 3px;
             color: white;
             margin-right: 5px;
+            margin-bottom: 2px;
         }
         
         .badge-vegan {
@@ -102,6 +109,12 @@
             background-color: #dc3545;
         }
         
+        .badge-allergen {
+            background-color: #ffc107;
+            color: #333;
+            border: 1px solid #e0a800;
+        }
+
         .clearfix {
             clear: both;
         }
@@ -113,40 +126,54 @@
     </div>
     
     {% for category_data in menu_data %}
-        <div class="category">
+        {# 最初のカテゴリー以外の場合、この要素の前で改ページを行う #}
+        <div class="category" {% if not forloop.first %}style="page-break-before: always;"{% endif %}>
+            <div class="clearfix"></div>
             <div class="category-title">{{ category_data.category.name }}</div>
             
-            {% for item in category_data.items %}
-                <div class="menu-item">
-                    {% if item.image %}
-                        <img src="{{ item.image.path }}" class="item-image">
-                    {% else %}
-                        <div class="item-image" style="background-color: #eee; text-align: center; line-height: 100px; color: #aaa;">No Image</div>
-                    {% endif %}
-                    
-                    <div class="item-details">
-                        <div class="item-price">¥{{ item.price }}</div>
-                        <div class="item-name">{{ item.name }}</div>
-                        <div class="item-description">{{ item.description }}</div>
-                        
-                        {% if item.allergens %}
-                            <div class="allergens">
-                                Allergens: {{ item.allergens|join:", " }}
+            <table class="menu-table">
+                {% for row in category_data.item_rows %}
+                <tr>
+                    {% for item in row %}
+                    <td class="menu-cell">
+                        {% if item.image %}
+                            <div class="image-container">
+                                <img src="{{ item.image.path }}" class="item-image">
                             </div>
+                        {% else %}
+                            <div class="image-container" style="background-color: #eee; line-height: 150px; color: #aaa;">No Image</div>
                         {% endif %}
                         
-                        <div class="badges">
-                            {% if item.is_vegan %}
-                                <span class="badge badge-vegan">Vegan</span>
-                            {% endif %}
-                            {% if not item.contains_pork %}
-                                <span class="badge badge-pork">No Pork</span>
-                            {% endif %}
+                        <div class="item-details">
+                            <div class="item-price">¥{{ item.price }}</div>
+                            <div class="item-name">{{ item.name }}</div>
+                            <div class="item-description">{{ item.description }}</div>
+                            
+                            <div class="badges">
+                                {% if item.is_vegan %}
+                                    <span class="badge badge-vegan">Vegan</span>
+                                {% endif %}
+                                {% if item.contains_pork %}
+                                    <span class="badge badge-pork">Use Pork</span>
+                                {% endif %}
+                                {% if item.allergens %}
+                                    {% for allergen in item.allergens %}
+                                        <span class="badge badge-allergen">{{ allergen }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-            {% endfor %}
+                    </td>
+                    {% endfor %}
+                    {# 行のアイテムが1つの場合、空のセルを追加してレイアウトを維持 #}
+                    {% if row|length == 1 %}
+                        <td class="menu-cell" style="border: none;"></td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </table>
+            
+            <div class="clearfix"></div>
         </div>
     {% endfor %}
     

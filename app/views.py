@@ -169,6 +169,14 @@ def pdf_export_view(request):
                         item.description, 'menu_item', item.id, 'description', target_language
                     )
                 
+                # アレルギー情報の英語マッピング
+                allergen_map = {
+                    'egg': 'Egg', 'milk': 'Milk', 'wheat': 'Wheat', 'shrimp': 'Shrimp',
+                    'crab': 'Crab', 'peanut': 'Peanut', 'soba': 'Buckwheat', 'fish': 'Fish',
+                    'nuts': 'Nuts', 'soy': 'Soy', 'fruit': 'Fruit', 'sesame': 'Sesame'
+                }
+                allergens_en = [allergen_map.get(a, a) for a in item.allergens]
+
                 # 翻訳されたデータを持つ辞書を作成
                 item_data = {
                     'original': item,
@@ -176,16 +184,21 @@ def pdf_export_view(request):
                     'description': translated_description,
                     'price': item.price,
                     'image': item.image,
-                    'allergens': item.get_allergens_display(),
+                    'allergens': allergens_en,
                     'is_vegan': item.is_vegan,
                     'contains_pork': item.contains_pork,
                 }
                 translated_items.append(item_data)
             
             if translated_items:
+                # 2列レイアウト用にアイテムをペアにする
+                item_rows = []
+                for i in range(0, len(translated_items), 2):
+                    item_rows.append(translated_items[i:i+2])
+                
                 menu_data.append({
                     'category': category,
-                    'items': translated_items
+                    'item_rows': item_rows
                 })
             
         context = {
